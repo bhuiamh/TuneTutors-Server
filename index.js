@@ -51,13 +51,16 @@ async function run() {
 
     // const menuCollection = client.db("bistroDB").collection("menu");
     // const reviewCollection = client.db("bistroDB").collection("reviews");
-    // const cartsCollection = client.db("bistroDB").collection("carts");
     // const paymentCollection = client.db("bistroDB").collection("payments");
+
     const userCollection = client.db("tuneTutors").collection("users");
     const instructorsCollection = client
       .db("tuneTutors")
       .collection("instructors");
     const classesCollection = client.db("tuneTutors").collection("classes");
+    const enrolledClassCollection = client
+      .db("tuneTutors")
+      .collection("enrolledClass");
 
     app.post("/jwt", (req, res) => {
       const user = req.body;
@@ -160,13 +163,13 @@ async function run() {
     //   res.send(result);
     // });
 
-    // // Cart Collection
-    // app.post("/carts", async (req, res) => {
-    //   const item = req.body;
+    // EnrolledClass
+    app.post("/enrolledClass", async (req, res) => {
+      const item = req.body;
 
-    //   const result = await cartsCollection.insertOne(item);
-    //   res.send(result);
-    // });
+      const result = await enrolledClassCollection.insertOne(item);
+      res.send(result);
+    });
 
     // app.get("/carts", verifyJWT, async (req, res) => {
     //   const email = req.query.email;
