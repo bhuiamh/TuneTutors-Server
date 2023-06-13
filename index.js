@@ -54,6 +54,9 @@ async function run() {
     // const cartsCollection = client.db("bistroDB").collection("carts");
     // const paymentCollection = client.db("bistroDB").collection("payments");
     const userCollection = client.db("tuneTutors").collection("users");
+    const instructorsCollection = client
+      .db("tuneTutors")
+      .collection("instructors");
     const classesCollection = client.db("tuneTutors").collection("classes");
 
     app.post("/jwt", (req, res) => {
@@ -143,6 +146,12 @@ async function run() {
 
     app.get("/classes", async (req, res) => {
       const result = await classesCollection.find().toArray();
+      res.send(result);
+    });
+
+    // Instructors Collection
+    app.get("/instructors", async (req, res) => {
+      const result = await instructorsCollection.find().toArray();
       res.send(result);
     });
 
