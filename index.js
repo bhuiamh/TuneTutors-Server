@@ -167,6 +167,15 @@ async function run() {
     app.post("/enrolledClass", async (req, res) => {
       const item = req.body;
 
+      const query = { userEmail: item.userEmail, enrolledId: item.enrolledId };
+
+      const existingEnrolled = await enrolledClassCollection.findOne(query);
+
+      if (existingEnrolled) {
+        return res.send({ message: "You have already enrolled this class" });
+      }
+
+      console.log(existingEnrolled, "existingEnrolled");
       const result = await enrolledClassCollection.insertOne(item);
       res.send(result);
     });
