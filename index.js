@@ -51,7 +51,7 @@ async function run() {
 
     // const menuCollection = client.db("bistroDB").collection("menu");
     // const reviewCollection = client.db("bistroDB").collection("reviews");
-    // const paymentCollection = client.db("bistroDB").collection("payments");
+    const paymentCollection = client.db("tuneTutors").collection("payments");
 
     const userCollection = client.db("tuneTutors").collection("users");
     const instructorsCollection = client
@@ -246,16 +246,16 @@ async function run() {
     //   });
     // });
 
-    // app.post("/payments", verifyJWT, async (req, res) => {
-    //   const payment = req.body;
-    //   const insertResult = await paymentCollection.insertOne(payment);
+    app.post("/payments", verifyJWT, async (req, res) => {
+      const payment = req.body;
+      const insertResult = await paymentCollection.insertOne(payment);
 
-    //   const query = {
-    //     _id: { $in: payment.cartItems.map((id) => new ObjectId(id)) },
-    //   };
-    //   const deleteResult = await cartsCollection.deleteMany(query);
-    //   res.send({ insertResult, deleteResult });
-    // });
+      const query = {
+        _id: { $in: payment.cartItems.map((id) => new ObjectId(id)) },
+      };
+      const deleteResult = await cartsCollection.deleteMany(query);
+      res.send({ insertResult, deleteResult });
+    });
 
     // app.get("/admin-stats", verifyJWT, verifyAdmin, async (req, res) => {
     //   const users = await userCollection.estimatedDocumentCount();
