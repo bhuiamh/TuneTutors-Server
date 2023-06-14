@@ -200,13 +200,33 @@ async function run() {
       console.log(result);
       res.send(result);
     });
+    app.get("/profile", verifyJWT, async (req, res) => {
+      const queryEmail = req.query.email;
+      if (!queryEmail) {
+        res.send([]);
+      }
 
-    // app.delete("/carts/:id", async (req, res) => {
-    //   const id = req.params.id;
-    //   const query = { _id: new ObjectId(id) };
-    //   const result = await cartsCollection.deleteOne(query);
-    //   res.send(result);
-    // });
+      const decodedEmail = req.decoded.email;
+      console.log(decodedEmail, "decoded");
+
+      if (queryEmail !== decodedEmail) {
+        return res
+          .status(403)
+          .send({ error: true, message: "Forbidden Access 3" });
+      }
+
+      const query = { userEmail: queryEmail };
+      const result = await userCollection.find(query).toArray();
+      console.log(result);
+      res.send(result);
+    });
+
+    app.delete("/acquired/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await enrolledClassCollection.deleteOne(query);
+      res.send(result);
+    });
 
     // // Payment
     // app.post("/create-payment-intent", verifyJWT, async (req, res) => {
