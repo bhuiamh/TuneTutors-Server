@@ -46,11 +46,8 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    // const menuCollection = client.db("bistroDB").collection("menu");
-    // const reviewCollection = client.db("bistroDB").collection("reviews");
     const paymentCollection = client.db("tuneTutors").collection("payments");
 
     const userCollection = client.db("tuneTutors").collection("users");
@@ -83,7 +80,6 @@ async function run() {
       next();
     };
 
-    // User Collection
     app.post("/user", async (req, res) => {
       const user = req.body;
       const query = { email: user.email };
@@ -133,37 +129,16 @@ async function run() {
       res.send(result);
     });
 
-    // Menu Collection
-    // app.delete("/menu/:id", verifyJWT, verifyAdmin, async (req, res) => {
-    //   const id = req.params.id;
-    //   const query = { _id: new ObjectId(id) };
-    //   const result = await menuCollection.deleteOne(query);
-    //   res.send(result);
-    // });
-
-    // app.post("/menu", verifyJWT, verifyAdmin, async (req, res) => {
-    //   const newItem = req.body;
-    //   const result = await menuCollection.insertOne(newItem);
-    //   res.send(result);
-    // });
-
     app.get("/classes", async (req, res) => {
       const result = await classesCollection.find().toArray();
       res.send(result);
     });
 
-    // Instructors Collection
     app.get("/instructors", async (req, res) => {
       const result = await instructorsCollection.find().toArray();
       res.send(result);
     });
 
-    // app.get("/reviews", async (req, res) => {
-    //   const result = await reviewCollection.find().toArray();
-    //   res.send(result);
-    // });
-
-    // EnrolledClass
     app.post("/enrolledClass", async (req, res) => {
       const item = req.body;
 
@@ -279,59 +254,6 @@ async function run() {
       const deleteResult = await enrolledClassCollection.deleteMany(query);
       res.send({ insertResult, deleteResult });
     });
-
-    // app.get("/admin-stats", verifyJWT, verifyAdmin, async (req, res) => {
-    //   const users = await userCollection.estimatedDocumentCount();
-    //   const products = await menuCollection.estimatedDocumentCount();
-    //   const orders = await cartsCollection.estimatedDocumentCount();
-    //   const payments = await paymentCollection.find().toArray();
-
-    //   const revenue = payments.reduce(
-    //     (sum, payment) => sum + payment.amount,
-    //     0
-    //   );
-
-    //   res.send({
-    //     revenue,
-    //     users,
-    //     products,
-    //     orders,
-    //   });
-    // });
-
-    // app.get("/order-stats", async (req, res) => {
-    //   const pipeline = [
-    //     {
-    //       $lookup: {
-    //         from: "menu",
-    //         localField: "menuItems",
-    //         foreignField: "_id",
-    //         as: "menuItemsData",
-    //       },
-    //     },
-    //     {
-    //       $unwind: "$menuItemsData",
-    //     },
-    //     {
-    //       $group: {
-    //         _id: "$menuItemsData.category",
-    //         count: { $sum: 1 },
-    //         total: { $sum: "$menuItemsData.price" },
-    //       },
-    //     },
-    //     {
-    //       $project: {
-    //         category: "$_id",
-    //         count: 1,
-    //         total: { $round: ["$total", 2] },
-    //         _id: 0,
-    //       },
-    //     },
-    //   ];
-
-    //   const result = await paymentCollection.aggregate(pipeline).toArray();
-    //   res.send(result);
-    // });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
