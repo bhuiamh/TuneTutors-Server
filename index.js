@@ -200,6 +200,7 @@ async function run() {
       console.log(result);
       res.send(result);
     });
+
     app.get("/profile", verifyJWT, async (req, res) => {
       const queryEmail = req.query.email;
       if (!queryEmail) {
@@ -207,7 +208,7 @@ async function run() {
       }
 
       const decodedEmail = req.decoded.email;
-      console.log(decodedEmail, "decoded");
+      console.log(decodedEmail, queryEmail, "decoded");
 
       if (queryEmail !== decodedEmail) {
         return res
@@ -215,7 +216,7 @@ async function run() {
           .send({ error: true, message: "Forbidden Access 3" });
       }
 
-      const query = { userEmail: queryEmail };
+      const query = { email: queryEmail };
       const result = await userCollection.find(query).toArray();
       console.log(result);
       res.send(result);
