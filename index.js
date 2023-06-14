@@ -201,6 +201,27 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/enrolled", verifyJWT, async (req, res) => {
+      const queryEmail = req.query.email;
+      if (!queryEmail) {
+        res.send([]);
+      }
+
+      const decodedEmail = req.decoded.email;
+      console.log(decodedEmail, "decoded");
+
+      if (queryEmail !== decodedEmail) {
+        return res
+          .status(403)
+          .send({ error: true, message: "Forbidden Access 3" });
+      }
+
+      const query = { email: queryEmail };
+      const result = await paymentCollection.find(query).toArray();
+      console.log(result);
+      res.send(result);
+    });
+
     app.get("/profile", verifyJWT, async (req, res) => {
       const queryEmail = req.query.email;
       if (!queryEmail) {
@@ -229,22 +250,24 @@ async function run() {
       res.send(result);
     });
 
-    // // Payment
-    // app.post("/create-payment-intent", verifyJWT, async (req, res) => {
-    //   const { price } = req.body;
-    //   const amount = price * 100;
-    //   const paymentIntent = await stripe.paymentIntents.create({
-    //     amount,
-    //     currency: "usd",
-    //     automatic_payment_methods: {
-    //       enabled: true,
-    //     },
-    //   });
+    // Payment
+    app.post("/create-payment-intent", verifyJWT, async (req, res) => {
+      const { price } = req.body;
+      console.log(price, "price");
+      const amount = Math.round(price * 100);
+      console.log(amount, "amount");
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount,
+        currency: "usd",
+        automatic_payment_methods: {
+          enabled: true,
+        },
+      });
 
-    //   res.send({
-    //     clientSecret: paymentIntent.client_secret,
-    //   });
-    // });
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
+    });
 
     app.post("/payments", verifyJWT, async (req, res) => {
       const payment = req.body;
@@ -253,7 +276,7 @@ async function run() {
       const query = {
         _id: { $in: payment.cartItems.map((id) => new ObjectId(id)) },
       };
-      const deleteResult = await cartsCollection.deleteMany(query);
+      const deleteResult = await enrolledClassCollection.deleteMany(query);
       res.send({ insertResult, deleteResult });
     });
 
