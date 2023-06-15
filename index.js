@@ -80,6 +80,20 @@ async function run() {
       next();
     };
 
+    // CRUD WITH USER
+    app.get("/users/instructor/:email", verifyJWT, async (req, res) => {
+      const email = req.params.email;
+
+      if (req.decoded.email !== email) {
+        res.send({ admin: false });
+      }
+
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      const result = { admin: user?.role === "instructor" };
+      res.send(result);
+    });
+
     app.post("/user", async (req, res) => {
       const user = req.body;
       const query = { email: user.email };
@@ -101,18 +115,6 @@ async function run() {
       const query = { email: email };
       const user = await userCollection.findOne(query);
       const result = { admin: user?.role === "admin" };
-      res.send(result);
-    });
-    app.get("/users/instructor/:email", verifyJWT, async (req, res) => {
-      const email = req.params.email;
-
-      if (req.decoded.email !== email) {
-        res.send({ admin: false });
-      }
-
-      const query = { email: email };
-      const user = await userCollection.findOne(query);
-      const result = { admin: user?.role === "instructor" };
       res.send(result);
     });
 
@@ -141,6 +143,7 @@ async function run() {
       const result = await userCollection.updateOne(filter, updateDoc);
       res.send(result);
     });
+
     app.patch("/users/makeuser/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
@@ -154,6 +157,12 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/users", verifyJWT, verifyAdmin, async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result);
+    });
+
+    // CRUD WITH ALL USERS
     app.delete("/allusers/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -161,11 +170,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/users", verifyJWT, verifyAdmin, async (req, res) => {
-      const result = await userCollection.find().toArray();
-      res.send(result);
-    });
-
+    // CRUD WITH CLASSES
     app.post("/classes", verifyJWT, async (req, res) => {
       const newItem = req.body;
       const result = await classesCollection.insertOne(newItem);
@@ -184,6 +189,7 @@ async function run() {
       res.send(result);
     });
 
+    // CRUD WITH INSTRUCTORS
     app.get("/instructors", async (req, res) => {
       const result = await instructorsCollection.find().toArray();
       res.send(result);
@@ -200,7 +206,6 @@ async function run() {
         return res.send({ message: "You have already enrolled this class" });
       }
 
-      console.log(existingEnrolled, "existingEnrolled");
       const result = await enrolledClassCollection.insertOne(item);
       res.send(result);
     });
@@ -212,7 +217,6 @@ async function run() {
       }
 
       const decodedEmail = req.decoded.email;
-      console.log(decodedEmail, "decoded");
 
       if (queryEmail !== decodedEmail) {
         return res
@@ -222,7 +226,6 @@ async function run() {
 
       const query = { userEmail: queryEmail };
       const result = await enrolledClassCollection.find(query).toArray();
-      console.log(result);
       res.send(result);
     });
 
@@ -233,7 +236,6 @@ async function run() {
       }
 
       const decodedEmail = req.decoded.email;
-      console.log(decodedEmail, "decoded");
 
       if (queryEmail !== decodedEmail) {
         return res
@@ -243,7 +245,6 @@ async function run() {
 
       const query = { email: queryEmail };
       const result = await paymentCollection.find(query).toArray();
-      console.log(result);
       res.send(result);
     });
 
@@ -254,7 +255,6 @@ async function run() {
       }
 
       const decodedEmail = req.decoded.email;
-      console.log(decodedEmail, queryEmail, "decoded");
 
       if (queryEmail !== decodedEmail) {
         return res
@@ -264,7 +264,6 @@ async function run() {
 
       const query = { email: queryEmail };
       const result = await userCollection.find(query).toArray();
-      console.log(result);
       res.send(result);
     });
 
@@ -278,9 +277,7 @@ async function run() {
     // Payment
     app.post("/create-payment-intent", verifyJWT, async (req, res) => {
       const { price } = req.body;
-      console.log(price, "price");
       const amount = Math.round(price * 100);
-      console.log(amount, "amount");
       const paymentIntent = await stripe.paymentIntents.create({
         amount,
         currency: "usd",
@@ -311,8 +308,6 @@ async function run() {
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
   } finally {
-    // Ensures that the client will close when you finish/error
-    // await client.close();
   }
 }
 run().catch(console.dir);
